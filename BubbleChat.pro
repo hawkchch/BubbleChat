@@ -13,8 +13,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    chatmessageitem.cpp \
+    chatmessagemodel.cpp \
+    message.cpp \
+    chatmessagedelegate.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    chatmessageitem.h \
+    chatmessagemodel.h \
+    message.h \
+    msgdef.h \
+    chatmessagedelegate.h
 
 FORMS    += mainwindow.ui
+
+CONFIG   += c++11

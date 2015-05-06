@@ -126,6 +126,8 @@ int MultiText::textHeight(int ALines) const
         return fontMetrics().height()*ALines + (frameWidth() + qRound(document()->documentMargin()))*2;
     else
         return qRound(document()->documentLayout()->documentSize().height()) + frameWidth()*2;
+
+
 }
 
 bool MultiText::canInsertFromMimeData(const QMimeData *ASource) const

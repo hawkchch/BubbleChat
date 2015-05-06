@@ -3,6 +3,7 @@
 #include "chatmessageview.h"
 #include <QModelIndex>
 #include <QAbstractItemModel>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,6 +19,9 @@ MainWindow::MainWindow(QWidget *parent) :
     msg.setItems(QList<BasicDef::MsgItem>{msgItem});
 
     ui->listView->appendMessage(msg);
+
+    qDebug() << ui->textEdit->toPlainText();
+    qDebug() << ui->textEdit->toHtml();
 }
 
 MainWindow::~MainWindow()

@@ -1,10 +1,8 @@
 #include "chatmessageitem.h"
 
-Q_DECLARE_METATYPE(BasicDef::MessageContact)
-Q_DECLARE_METATYPE(BasicDef::MsgItem)
-
 ChatMessageItem::ChatMessageItem(const Message &msg)
 {
+    setMessage(msg);
     setFrom(msg.from());
     setTo(msg.to());
     setAuthor(msg.author());
@@ -12,6 +10,16 @@ ChatMessageItem::ChatMessageItem(const Message &msg)
     setItems(msg.items());
     setTerminalType(msg.terminalType());
     setStamp(msg.stamp());
+}
+
+Message ChatMessageItem::message() const
+{
+    return data(DATA_ROLE_MESSAGE).value<Message>();
+}
+
+void ChatMessageItem::setMessage(const Message &msg)
+{
+    setData(QVariant::fromValue(msg), DATA_ROLE_MESSAGE);
 }
 
 BasicDef::MessageContact ChatMessageItem::from() const

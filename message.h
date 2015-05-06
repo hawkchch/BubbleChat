@@ -30,6 +30,24 @@ public:
             MessageOut
         };
     Message();
+    Message(const Message& msg){
+        m_from = msg.m_from;
+        m_to = msg.m_to;
+        m_ccs = msg.m_ccs;
+        m_author = msg.m_author;
+        m_terminalType = msg.m_terminalType;
+        m_stamp = msg.m_stamp;
+        m_items = msg.m_items;
+        m_messageId = msg.m_messageId;
+        m_direction = msg.m_direction;
+        m_isOffLineFile = msg.m_isOffLineFile;
+        m_isGroupChange = msg.m_isGroupChange;
+        m_isVoice = msg.m_isVoice;
+        m_isTimeSeparator = msg.m_isTimeSeparator;
+        m_plainTextCount = msg.m_plainTextCount;
+
+    }
+    ~Message(){}
     BasicDef::MessageContact from() const {return m_from;}
     void setFrom(const BasicDef::MessageContact &from) {m_from = from;}
     QList<BasicDef::MessageContact> ccs() const {return m_ccs;}
@@ -67,7 +85,6 @@ public:
     int plainTextCount() const {return m_plainTextCount;}
     bool isVoice() const {return m_isVoice;}
     void setIsVoice(bool isVoice) {m_isVoice = isVoice;}
-
 private:
     BasicDef::MessageContact m_from;
     BasicDef::MessageContact m_to;

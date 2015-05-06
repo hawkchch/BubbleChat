@@ -2,8 +2,8 @@
 #define CHATMESSAGEDELEGATE_H
 
 #include <QStyledItemDelegate>
-
-class ChatMessageDelegate : public QStyledItemDelegate
+#include <QItemDelegate>
+class ChatMessageDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:

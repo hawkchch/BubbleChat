@@ -17,14 +17,18 @@ SOURCES += main.cpp\
     chatmessageitem.cpp \
     chatmessagemodel.cpp \
     message.cpp \
-    chatmessagedelegate.cpp
+    chatmessagedelegate.cpp \
+    multitext.cpp \
+    chatmessageview.cpp
 
 HEADERS  += mainwindow.h \
     chatmessageitem.h \
     chatmessagemodel.h \
     message.h \
     msgdef.h \
-    chatmessagedelegate.h
+    chatmessagedelegate.h \
+    multitext.h \
+    chatmessageview.h
 
 FORMS    += mainwindow.ui
 

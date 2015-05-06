@@ -5,6 +5,10 @@
 #include "msgdef.h"
 #include "message.h"
 
+Q_DECLARE_METATYPE(BasicDef::MessageContact)
+Q_DECLARE_METATYPE(BasicDef::MsgItem)
+Q_DECLARE_METATYPE(Message)
+
 class ChatMessageItem : public QStandardItem
 {
 public:
@@ -22,10 +26,15 @@ public:
         DATA_ROLE_IS_VOICE,
         DATA_ROLE_IS_OFFLINEFILE,
         DATA_ROLE_IS_GROUPCHANGE,
-        DATA_ROLE_IS_TIMESEPARATOR
+        DATA_ROLE_IS_TIMESEPARATOR,
+
+        DATA_ROLE_MESSAGE
     };
 
     ChatMessageItem(const Message& msg);
+
+    Message message() const;
+    void setMessage(const Message& msg);
 
     BasicDef::MessageContact from() const;
     void setFrom(const BasicDef::MessageContact& contact);

@@ -15,13 +15,16 @@ MainWindow::MainWindow(QWidget *parent) :
     BasicDef::MsgItem msgItem;
     msgItem.type = BasicDef::MIT_TEXT;
     msgItem.data = "Hello World!";
-    msgItem.count = msgItem.data.count();
+    msgItem.count = 1;
     msg.setItems(QList<BasicDef::MsgItem>{msgItem});
 
+    //ui->textEdit->setMessage(msg);
     ui->listView->appendMessage(msg);
 
-    qDebug() << ui->textEdit->toPlainText();
-    qDebug() << ui->textEdit->toHtml();
+    msgItem.data = "HHHHHH WTF!!!";
+    msg.setItems(QList<BasicDef::MsgItem>{msgItem});
+    ui->listView->appendMessage(msg);
+
 }
 
 MainWindow::~MainWindow()

@@ -3,11 +3,12 @@
 ChatMessageView::ChatMessageView(QWidget *parent)
     :QListView(parent)
 {
-    m_sourceModel = new ChatMessageModel;
-    m_sortModel = new ChatMessageSortFilterProxyModel;
+    m_sourceModel = new ChatMessageModel(this);
+    m_sortModel = new ChatMessageSortFilterProxyModel(this);
     m_sortModel->setSourceModel(m_sourceModel);
 
-    setItemDelegate(new ChatMessageDelegate);
+    setItemDelegate(new ChatMessageDelegate(this));
+
     setModel(m_sourceModel);
 }
 

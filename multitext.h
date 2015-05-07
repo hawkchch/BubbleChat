@@ -9,6 +9,7 @@ class MultiText : public QTextEdit
     Q_OBJECT
 public:
     MultiText(const Message& msg, QWidget *parent);
+    MultiText(QWidget *parent);
     ~MultiText();
 
     void setMessage(const Message& msg);
@@ -21,6 +22,7 @@ public:
     void clear();
     QStringList pasteImgFilenames(){return m_pasteImgList;}
     void setEmoticonsPath(QString path);
+
 
 public slots:
     void insertFace(int idx, bool addImgElement = true);
@@ -55,6 +57,12 @@ protected:
 
 protected slots:
     void onTextChanged();
+
+private:
+    void appendText(const QString& text);
+    void appendImage(const QString& src);
+    void appendBaseFace(int idx);
+    void appendHuhooFace(int idx);
 
 private:
     bool m_autoResize;

@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QFile>
 #include <QFileDialog>
 #include <QApplication>
 #include <QClipboard>
@@ -16,6 +17,8 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QtXml/QDomDocument>
+#include <QTextCursor>
+#include "message.h"
 
 static const int BASE_FACE_COUNT = 42;
 static const int HUHOO_FACE_COUNT = 15;
@@ -44,6 +47,32 @@ MultiText::MultiText(const Message &msg, QWidget *AParent) : QTextEdit(AParent)
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
 
     setMessage(msg);
+    setReadOnly(true);
+}
+
+MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
+{
+    m_autoResize = false;
+    m_minimumLines = 4;
+
+    setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    connect(this,SIGNAL(textChanged()),SLOT(onTextChanged()));
+
+    clear();
+    m_actionCopyImage = new QAction(tr("Copy image"), this);
+    connect(m_actionCopyImage, SIGNAL(triggered()), SLOT(copyImage()));
+    m_actionSaveIamge = new QAction(tr("Save Image"), this);
+    connect(m_actionSaveIamge, SIGNAL(triggered()), SLOT(saveImage()));
+    connect(this, SIGNAL(textChanged()), SLOT(slotTextChanged()));
+    m_actionCopy = new QAction(tr("Copy"), this);
+    m_actionCopy->setShortcut(QKeySequence::Copy);
+    connect(m_actionCopy, SIGNAL(triggered()), SLOT(copy()));
+    m_actionSelect = new QAction(tr("Select All"), this);
+    m_actionSelect->setShortcut(QKeySequence::SelectAll);
+    connect(m_actionSelect, SIGNAL(triggered()), SLOT(selectAll()));
+    m_copyAvailable = false;
+    connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
+    setReadOnly(true);
 }
 
 MultiText::~MultiText()
@@ -55,15 +84,6 @@ MultiText::~MultiText()
     m_facesMap.clear();
 }
 
-void MultiText::setMessage(const Message &msg)
-{
-    m_message = msg;
-}
-
-Message MultiText::message() const
-{
-    return m_message;
-}
 
 void MultiText::clear()
 {
@@ -152,13 +172,17 @@ void MultiText::insertFace(int idx, bool addImageElement /*= true*/)
     QString faceName = QString("%1/face%2.png").arg(m_baseFacesPath).arg(idx+1);
     if (addImageElement)
     {
+        // 添加标签
         QTextImageFormat imageFormat;
         imageFormat.setName(QString("face%1").arg(idx));
         textCursor().insertImage(imageFormat);
+
+        // 添加资源
         QUrl url(QString("face%1").arg(idx));
         QPixmap facePix(faceName);
-        document()->addResource(QTextDocument::ImageResource,
-            url, facePix);
+        document()->addResource(QTextDocument::ImageResource, url, facePix);
+
+        // 排版
         setLineWrapColumnOrWidth(lineWrapColumnOrWidth());
     }
 }
@@ -350,3 +374,169 @@ void MultiText::setEmoticonsPath(QString path)
     m_baseFacesPath = m_emotionsPath + "/base";
     m_huhooFacesPath = m_emotionsPath + "/huhoo";
 }
+
+void MultiText::setMessage(const Message &msg)
+{
+    clear();
+    m_message = msg;
+    for(int i=0; i<msg.items().count(); i++)
+    {
+        QString emotion;
+        bool    ok = false;
+        int     emotionIndex = 0;
+        QString localFileName;
+        QString imageFile;
+        QFile   file;
+        auto item = msg.items().at(i);
+
+        switch(item.type)
+        {
+        case BasicDef::MIT_TEXT:
+            appendText(item.data);
+            break;
+
+        case BasicDef::MIT_IMAGE:
+            localFileName = item.data;
+            if(localFileName.contains("/"))
+            {
+                localFileName = localFileName.mid(localFileName.lastIndexOf("/") + 1);
+            }
+            imageFile = localFileName;//m_chatImagePath + "/" + localFileName;
+            //QFile file(imageFile);
+            file.setFileName(imageFile);
+            if(file.exists())
+            {
+                //imgHtml = QString("<img src=\"%1\" />").arg(QUrl::fromLocalFile(imageFile).toString());
+                appendImage(QUrl::fromLocalFile(imageFile).toString());
+            }
+//            else
+//            {
+//                QString imageId = QString("image_%1_%2").arg(QDateTime::currentMSecsSinceEpoch()).arg(QString::number(qrand()));
+//                imgHtml = QString("<img src=%1 />").arg(imageId);
+//                m_imageUrls[imageId] = QUrl::fromLocalFile(imageFile).toString();
+//                imageIds.append(imageId);
+//                //qDebug() << "AdiumStyleWidget image file not exeist! image id = " << imageId;
+//                emit chatImageGet(item.data, imageId);
+//            }
+            break;
+
+        case BasicDef::MIT_EMOTICONS:
+            emotion = item.data;
+            if (emotion.startsWith("face"))
+            {
+                emotion.remove("face");
+            }
+            emotionIndex = emotion.toInt(&ok);
+            if (ok)
+            {
+                appendBaseFace(emotionIndex);
+            }
+            break;
+
+        case BasicDef::MIT_GIF:
+            emotion = item.data;
+            if (emotion.startsWith("bface"))
+            {
+                emotion.remove("bface");
+            }
+            ok = false;
+            emotionIndex = emotion.toInt(&ok);
+            if (ok)
+            {
+                appendHuhooFace(emotionIndex);
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+Message MultiText::message() const
+{
+    return m_message;
+}
+
+void MultiText::appendText(const QString &text)
+{
+    QTextCursor cursor = textCursor();
+
+    if (!cursor.atEnd())
+    {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+    }
+
+    cursor.insertText(text);
+}
+
+void MultiText::appendImage(const QString &src)
+{
+    QTextCursor cursor = textCursor();
+
+    if (!cursor.atEnd())
+    {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+    }
+
+    QString html = QString("<img src=\"%1\" />").arg(src);
+    cursor.insertHtml(html);
+}
+
+void MultiText::appendBaseFace(int idx)
+{
+    // 构造图片地址
+    QString faceName = QString("%1/face%2.png").arg(m_baseFacesPath).arg(idx+1);
+
+    // 定位游标尾部
+    QTextCursor cursor = textCursor();
+    if (!cursor.atEnd())
+    {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+    }
+
+    // 添加标签
+    QTextImageFormat imageFormat;
+    imageFormat.setName(QString("face%1").arg(idx));
+    cursor.insertImage(imageFormat);
+
+    // 添加资源
+    QUrl url(QString("face%1").arg(idx));
+    QPixmap facePix(faceName);
+    document()->addResource(QTextDocument::ImageResource, url, facePix);
+
+    // 排版
+    setLineWrapColumnOrWidth(lineWrapColumnOrWidth());
+
+}
+
+void MultiText::appendHuhooFace(int idx)
+{
+    // 构造图片地址
+    QString faceName = QString("%1/hu%2.gif").arg(m_huhooFacesPath).arg(idx+1);
+
+    // 定位游标尾部
+    QTextCursor cursor = textCursor();
+    if (!cursor.atEnd())
+    {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+    }
+
+    // 添加标签
+    QTextImageFormat imageFormat;
+    imageFormat.setName(QString("bface%1").arg(idx));
+    cursor.insertImage(imageFormat);
+
+    if(!m_facesMap.contains(idx))
+    {
+        m_facesMap[idx] = new QMovie(faceName);
+        connect(m_facesMap[idx], SIGNAL(frameChanged(int)), SLOT(updateFaceFrame(int)));
+        m_facesMap[idx]->setCacheMode(QMovie::CacheNone);
+        m_facesMap[idx]->start();
+    }
+}
+

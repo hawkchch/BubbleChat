@@ -18,36 +18,15 @@
 #include <QDebug>
 #include <QtXml/QDomDocument>
 #include <QTextCursor>
+#include <QDebug>
 #include "message.h"
 
 static const int BASE_FACE_COUNT = 42;
 static const int HUHOO_FACE_COUNT = 15;
 
-MultiText::MultiText(const Message &msg, QWidget *AParent) : QTextEdit(AParent)
+MultiText::MultiText(const Message &msg, QWidget *parent) : MultiText(parent)
 {
-    m_autoResize = false;
-    m_minimumLines = 4;
-
-    setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-    connect(this,SIGNAL(textChanged()),SLOT(onTextChanged()));
-
-    clear();
-    m_actionCopyImage = new QAction(tr("Copy image"), this);
-    connect(m_actionCopyImage, SIGNAL(triggered()), SLOT(copyImage()));
-    m_actionSaveIamge = new QAction(tr("Save Image"), this);
-    connect(m_actionSaveIamge, SIGNAL(triggered()), SLOT(saveImage()));
-    connect(this, SIGNAL(textChanged()), SLOT(slotTextChanged()));
-    m_actionCopy = new QAction(tr("Copy"), this);
-    m_actionCopy->setShortcut(QKeySequence::Copy);
-    connect(m_actionCopy, SIGNAL(triggered()), SLOT(copy()));
-    m_actionSelect = new QAction(tr("Select All"), this);
-    m_actionSelect->setShortcut(QKeySequence::SelectAll);
-    connect(m_actionSelect, SIGNAL(triggered()), SLOT(selectAll()));
-    m_copyAvailable = false;
-    connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
-
     setMessage(msg);
-    setReadOnly(true);
 }
 
 MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
@@ -73,6 +52,8 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     m_copyAvailable = false;
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
     setReadOnly(true);
+
+    qDebug() << "MultiText";
 }
 
 MultiText::~MultiText()
@@ -82,6 +63,8 @@ MultiText::~MultiText()
         delete m_facesMap[id];
     }
     m_facesMap.clear();
+
+    qDebug() << "~MultiText";
 }
 
 

@@ -14,17 +14,18 @@ MainWindow::MainWindow(QWidget *parent) :
     Message msg;
     BasicDef::MsgItem msgItem;
     msgItem.type = BasicDef::MIT_TEXT;
-    msgItem.data = "Hello World!";
     msgItem.count = 1;
-    msg.setItems(QList<BasicDef::MsgItem>{msgItem});
+
+
+    for(int i=0; i<6; i++)
+    {
+        msgItem.data = QString("%1").arg(i);
+        msg.setItems(QList<BasicDef::MsgItem>{msgItem});
+        ui->listView->appendMessage(msg);
+    }
+
 
     //ui->textEdit->setMessage(msg);
-    ui->listView->appendMessage(msg);
-
-    msgItem.data = "HHHHHH WTF!!!";
-    msg.setItems(QList<BasicDef::MsgItem>{msgItem});
-    ui->listView->appendMessage(msg);
-
 }
 
 MainWindow::~MainWindow()

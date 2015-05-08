@@ -4,6 +4,7 @@
 #include <QStyledItemDelegate>
 #include <QItemDelegate>
 
+
 class ChatMessageView;
 
 class ChatMessageDelegate : public QItemDelegate
@@ -26,16 +27,23 @@ public:
     void setEditorData(QWidget *editor,
                        const QModelIndex &index) const;
 
-//    void setModelData(QWidget *editor,
-//                      QAbstractItemModel *model,
-//                      const QModelIndex &index) const;
+    void setModelData(QWidget *editor,
+                      QAbstractItemModel *model,
+                      const QModelIndex &index) const;
+
+//    void updateEditorGeometry(QWidget *editor,
+//                              const QStyleOptionViewItem &option,
+//                              const QModelIndex &index) const;
 
 signals:
+    void indexSize(QModelIndex, QSize);
 
 public slots:
 
 private:
     ChatMessageView *m_parent;
+
+    mutable QMap<QModelIndex, QSize> m_mapHeight;
 
 };
 

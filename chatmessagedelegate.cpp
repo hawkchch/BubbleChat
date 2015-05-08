@@ -3,7 +3,9 @@
 #include "multitext.h"
 #include <QPainter>
 #include <QPushButton>
+#include <QDebug>
 #include "chatmessageview.h"
+#include <QApplication>
 
 ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
     QItemDelegate(parent)
@@ -13,7 +15,22 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-/*
+
+//    drawDisplay(painter, option, option.rect, QString("Hello World!"));
+//    drawBackground(painter, option, index);
+//    QApplication::style()->drawComplexControl();
+//    return;
+//    const QPushButton btn("TEST");
+
+//    QApplication::style()->drawControl(QStyle::CE_PushButton, &option, painter, &btn);
+//    connect(&btn, &QPushButton::clicked, [&btn](){
+//        btn.setText("OK");
+//    });
+
+//    return;
+
+
+    /*
     // here we have active painter provided by caller
 
     // by the way - we can't use painter->save() and painter->restore()
@@ -56,14 +73,33 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     painter->begin(original_pdev_ptr);
 
     // example of simple painting after widget
-    //painter->drawEllipse(0,0, 10,10);
-*/
+    painter->drawEllipse(0,0, 10,10);
+
+    return;
+    */
 
     if (index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>())
     {
         if (m_parent)
         {
             m_parent->openPersistentEditor(index);
+
+            QRect parentRect = m_parent->rect();
+            int viewStartHeight = parentRect.y();
+            int viewEndHeight = parentRect.y() + parentRect.height();
+
+            for(int row = 0; row < m_parent->model()->rowCount(); row++)
+            {
+                QModelIndex idx = m_parent->model()->index(row, 0);
+                QRect rc = m_parent->visualRect(idx);
+
+                int indexStartHeight = rc.y();
+                if ( indexStartHeight <= viewStartHeight - rc.height()
+                     || indexStartHeight >= viewEndHeight + rc.height() )
+                {
+                    m_parent->closePersistentEditor(idx);
+                }
+            }
         }
     }
     else
@@ -74,18 +110,26 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 
 QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
+    if ( index.isValid() && index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
-        return option.widget->sizeHint();
+        if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
+        {
+            QSize sz;
+            sz.setWidth(option.rect.width());
+            if (m_mapHeight.find(index) != m_mapHeight.end() )
+            {
+                sz.setHeight(m_mapHeight[index].height());
+                return sz;
+            }
+        }
     }
-    else
-    {
-        return QItemDelegate::sizeHint(option, index);
-    }
+
+    return QItemDelegate::sizeHint(option, index);
 }
 
 QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+
     QWidget *widget = nullptr;
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
@@ -97,7 +141,8 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         case BasicDef::MIT_IMAGE:
         case BasicDef::MIT_GIF:
         case BasicDef::MIT_EMOTICONS:
-            widget = new MultiText(msg, m_parent);
+            widget = new MultiText(msg, parent);
+            m_mapHeight[index] = widget->sizeHint();
             break;
 
         case BasicDef::MIT_VOICE:
@@ -140,19 +185,38 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     }
 }
 
-//void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+//void ChatMessageDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
 //{
-//    if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
-//    {
-//        MultiText* text = qobject_cast<MultiText*>(editor);
+//    MultiText* text = qobject_cast<MultiText*>(editor);
 
-//        if (text)
-//        {
-//            model->setData(index, QVariant::fromValue<Message>(text->message()));
-//        }
-//    }
-//    else
+//    if (text)
 //    {
-//        QItemDelegate::setModelData(editor, model, index);
+//        int hCell = option.rect.height();
+//        int hEditor = editor->sizeHint().height();
+//        int h = qMax( hCell, hEditor );
+//        QSize size = option.rect.size();
+//        size.setHeight( h );
+//        editor->setGeometry( QRect(option.rect.topLeft(), size));
 //    }
+
+////    QRect rect(option.rect);
+////    editor->setGeometry(rect);
+////    QItemDelegate::updateEditorGeometry(editor, option, index);
 //}
+
+void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
+    {
+        MultiText* text = qobject_cast<MultiText*>(editor);
+
+        if (text)
+        {
+            model->setData(index, QVariant::fromValue<Message>(text->message()));
+        }
+    }
+    else
+    {
+        QItemDelegate::setModelData(editor, model, index);
+    }
+}

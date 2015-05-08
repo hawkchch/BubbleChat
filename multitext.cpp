@@ -54,6 +54,9 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     setReadOnly(true);
 
     qDebug() << "MultiText";
+
+    setStyleSheet(QString("border-image: url(:/picture/pic/chat.png) 27;"
+                          "border-width: 27;"));
 }
 
 MultiText::~MultiText()

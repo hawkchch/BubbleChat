@@ -6,6 +6,8 @@
 #include <QDebug>
 #include "chatmessageview.h"
 #include <QApplication>
+#include <QLabel>
+#include <QHBoxLayout>
 
 ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
     QItemDelegate(parent)
@@ -15,7 +17,6 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-
 //    drawDisplay(painter, option, option.rect, QString("Hello World!"));
 //    drawBackground(painter, option, index);
 //    QApplication::style()->drawComplexControl();
@@ -158,6 +159,17 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 
     if(widget != nullptr)
     {
+//        QLabel *avatar = new QLabel;
+//        avatar->setPixmap(QPixmap(QString(":/picture/pic/5.jpg")));
+
+
+//        QWidget *frame = new QWidget(m_parent);
+//        frame->setLayout(new QHBoxLayout);
+//        frame->layout()->addWidget(widget);
+//        frame->layout()->addWidget(avatar);
+
+//        return frame;
+
         return widget;
     }
     else

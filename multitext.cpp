@@ -27,6 +27,7 @@ static const int HUHOO_FACE_COUNT = 15;
 MultiText::MultiText(const Message &msg, QWidget *parent) : MultiText(parent)
 {
     setMessage(msg);
+    qDebug() << msg.items().at(0).data;
 }
 
 MultiText::MultiText(QWidget *parent) : QTextEdit(parent)

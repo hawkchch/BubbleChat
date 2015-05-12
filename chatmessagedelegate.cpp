@@ -21,12 +21,15 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    //qDebug() << "ChatMessageDelegate::paint";
     painter->save();
     if (index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>())
     {
         if (m_parent)
         {
             m_parent->openPersistentEditor(index);
+            //qDebug() << "openPersistentEditor index row: " << index.row();
+            m_mapIndexClock[index] = 0;
 
             QRect parentRect = m_parent->rect();
 
@@ -40,10 +43,11 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
                 if ( indexStartHeight <= viewStartHeight - rc.height()
                      || indexStartHeight >= viewEndHeight + rc.height() )
                 {
-                    if(m_mapIndexClock[index] >= 60)
+                    if(m_mapIndexClock[idx] >= 10)
                     {
                         m_parent->closePersistentEditor(idx);
                         m_mapIndexClock.remove(idx);
+                        //qDebug() << "closePersistentEditor index row: " << idx.row();
                     }
                 }
             }
@@ -58,6 +62,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 
 QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    //qDebug() << "ChatMessageDelegate::sizeHint";
     if ( index.isValid() && index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
@@ -74,24 +79,17 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
 
 QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    //qDebug() << "ChatMessageDelegate::createEditor";
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
         if(msg.direction() == Message::MessageIn)
         {
-            auto in = new InMessageForm(parent);
-            in->setMessage(msg);
-            m_mapEditorSize[index] = in->sizeHint();
-            m_mapIndexClock[index] = 0;
-            return in;
+            return (new InMessageForm(parent));
         }
         else if(msg.direction() == Message::MessageOut)
         {
-            auto out = new OutMessageForm(parent);
-            out->setMessage(msg);
-            m_mapEditorSize[index] = out->sizeHint();
-            m_mapIndexClock[index] = 0;
-            return out;
+            return (new OutMessageForm(parent));
         }
     }
 
@@ -100,6 +98,7 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 
 void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
+    //qDebug() << "ChatMessageDelegate::setEditorData";
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
@@ -111,6 +110,8 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
             if (widget)
             {
                 widget->setMessage(msg);
+                m_mapEditorSize[index] = widget->sizeHint();
+                m_mapIndexClock[index] = 0;
             }
         }
         else
@@ -120,6 +121,8 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
             if (widget)
             {
                 widget->setMessage(msg);
+                m_mapEditorSize[index] = widget->sizeHint();
+                m_mapIndexClock[index] = 0;
             }
         }
     }
@@ -131,6 +134,7 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 
 void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
+    //qDebug() << "ChatMessageDelegate::setModelData";
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
@@ -170,10 +174,5 @@ void ChatMessageDelegate::timerCheck()
     foreach (QModelIndex index, m_mapIndexClock.keys())
     {
         m_mapIndexClock[index]++;
-//        if( m_parent && m_mapIndexClock[index] >= 5)
-//        {
-//            m_parent->closePersistentEditor(index);
-//            m_mapIndexClock.remove(index);
-//        }
     }
 }

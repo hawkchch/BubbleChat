@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         msgItem.data = QString("%1").arg(i);
         msg.setItems(QList<BasicDef::MsgItem>{msgItem});
+        msg.setDirection(i%2==0?Message::MessageIn:Message::MessageOut);
         ui->listView->appendMessage(msg);
     }
 

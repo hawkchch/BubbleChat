@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include "imessageform.h"
-#include "multitext.h"
 
 namespace Ui {
 class InMessageForm;
@@ -18,6 +17,7 @@ public:
     ~InMessageForm();
 
     // IMessageForm
+    virtual QObject *instance();
     virtual Message message() const;
     virtual void setMessage(const Message& msg);
 
@@ -29,7 +29,8 @@ public:
 private:
     Ui::InMessageForm *ui;
 
-    MultiText *m_contentWidget;
+    QWidget *m_contentWidget;
+    BasicDef::MsgItemType m_msgType;
 };
 
 #endif // INMESSAGEFORM_H

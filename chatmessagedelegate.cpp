@@ -40,7 +40,11 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
                 if ( indexStartHeight <= viewStartHeight - rc.height()
                      || indexStartHeight >= viewEndHeight + rc.height() )
                 {
-                    m_parent->closePersistentEditor(idx);
+                    if(m_mapIndexClock[index] >= 60)
+                    {
+                        m_parent->closePersistentEditor(idx);
+                        m_mapIndexClock.remove(idx);
+                    }
                 }
             }
         }
@@ -58,14 +62,9 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     {
         if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
         {
-            QSize sz;
-            sz.setWidth(option.rect.width());
             if (m_mapEditorSize.find(index) != m_mapEditorSize.end() )
             {
-                sz.setHeight(m_mapEditorSize[index].height());
-                sz.setWidth(m_mapEditorSize[index].width());
-
-                return sz;
+                return m_mapEditorSize[index];
             }
         }
     }
@@ -75,58 +74,28 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
 
 QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-
-    QWidget *widget = nullptr;
-    InMessageForm *in = nullptr;
-    OutMessageForm *out = nullptr;
-
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
-        switch (msg.items()[0].type) {
-        case BasicDef::MIT_NONE:
-            break;
-        case BasicDef::MIT_TEXT:
-        case BasicDef::MIT_IMAGE:
-        case BasicDef::MIT_GIF:
-        case BasicDef::MIT_EMOTICONS:
-            in = new InMessageForm(parent);
+        if(msg.direction() == Message::MessageIn)
+        {
+            auto in = new InMessageForm(parent);
             in->setMessage(msg);
             m_mapEditorSize[index] = in->sizeHint();
             m_mapIndexClock[index] = 0;
-            widget = in;
-            break;
-
-        case BasicDef::MIT_VOICE:
-            break;
-
-        case BasicDef::MIT_OFFLINEFILE:
-            break;
-
-        default:
-            break;
+            return in;
+        }
+        else if(msg.direction() == Message::MessageOut)
+        {
+            auto out = new OutMessageForm(parent);
+            out->setMessage(msg);
+            m_mapEditorSize[index] = out->sizeHint();
+            m_mapIndexClock[index] = 0;
+            return out;
         }
     }
 
-    if(in != nullptr)
-    {
-//        QLabel *avatar = new QLabel;
-//        avatar->setPixmap(QPixmap(QString(":/picture/pic/5.jpg")));
-
-
-//        QWidget *frame = new QWidget(m_parent);
-//        frame->setLayout(new QHBoxLayout);
-//        frame->layout()->addWidget(widget);
-//        frame->layout()->addWidget(avatar);
-
-//        return frame;
-
-        return in;
-    }
-    else
-    {
-        return QItemDelegate::createEditor(parent, option, index);
-    }
+    return QItemDelegate::createEditor(parent, option, index);
 }
 
 void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
@@ -135,11 +104,23 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
 
-        InMessageForm* text = qobject_cast<InMessageForm*>(editor);
-
-        if (text)
+        if(msg.direction() == Message::MessageIn)
         {
-            text->setMessage(msg);
+            auto widget = qobject_cast<InMessageForm*>(editor);
+
+            if (widget)
+            {
+                widget->setMessage(msg);
+            }
+        }
+        else
+        {
+            auto widget = qobject_cast<OutMessageForm*>(editor);
+
+            if (widget)
+            {
+                widget->setMessage(msg);
+            }
         }
     }
     else
@@ -152,11 +133,25 @@ void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
 {
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
-        InMessageForm* text = qobject_cast<InMessageForm*>(editor);
+        auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
 
-        if (text)
+        if(msg.direction() == Message::MessageIn)
         {
-            model->setData(index, QVariant::fromValue<Message>(text->message()));
+            auto widget = qobject_cast<InMessageForm*>(editor);
+
+            if (widget)
+            {
+                model->setData(index, QVariant::fromValue<Message>(widget->message()));
+            }
+        }
+        else
+        {
+            auto widget = qobject_cast<OutMessageForm*>(editor);
+
+            if (widget)
+            {
+                model->setData(index, QVariant::fromValue<Message>(widget->message()));
+            }
         }
     }
     else
@@ -172,13 +167,13 @@ bool ChatMessageDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, 
 
 void ChatMessageDelegate::timerCheck()
 {
-//    foreach (QModelIndex index, m_mapIndexClock.keys())
-//    {
-//        m_mapIndexClock[index]++;
+    foreach (QModelIndex index, m_mapIndexClock.keys())
+    {
+        m_mapIndexClock[index]++;
 //        if( m_parent && m_mapIndexClock[index] >= 5)
 //        {
 //            m_parent->closePersistentEditor(index);
 //            m_mapIndexClock.remove(index);
 //        }
-//    }
+    }
 }

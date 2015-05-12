@@ -2,18 +2,18 @@
 #include "ui_inmessageform.h"
 #include <QHBoxLayout>
 
+#include "multitext.h"
+
 InMessageForm::InMessageForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::InMessageForm)
 {
     ui->setupUi(this);
-    m_contentWidget = new MultiText(parent);
 
+    m_contentWidget = nullptr;
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setMargin(0);
     layout->setSpacing(0);
-    layout->addWidget(m_contentWidget);
-    m_contentWidget->setAutoFillBackground(true);
     ui->inContentWidget->setLayout(layout);
 }
 
@@ -22,11 +22,42 @@ InMessageForm::~InMessageForm()
     delete ui;
 }
 
+QObject *InMessageForm::instance()
+{
+    return this;
+}
+
 Message InMessageForm::message() const
 {
     if(m_contentWidget)
     {
-        return m_contentWidget->message();
+        switch (m_msgType)
+        {
+        case BasicDef::MIT_NONE:
+            break;
+        case BasicDef::MIT_TEXT:
+        case BasicDef::MIT_IMAGE:
+        case BasicDef::MIT_GIF:
+        case BasicDef::MIT_EMOTICONS:
+        {
+            auto widget = qobject_cast<MultiText*>(m_contentWidget);
+            if(widget)
+            {
+                return widget->message();
+            }
+
+            break;
+        }
+
+        case BasicDef::MIT_VOICE:
+            break;
+
+        case BasicDef::MIT_OFFLINEFILE:
+            break;
+
+        default:
+            break;
+        }
     }
 
     return Message();
@@ -34,9 +65,45 @@ Message InMessageForm::message() const
 
 void InMessageForm::setMessage(const Message &msg)
 {
-    if(m_contentWidget)
+    if ( msg.items().length() > 0 && msg.direction() == Message::MessageIn )
     {
-        m_contentWidget->setMessage(msg);
+        if ( m_contentWidget
+            && ui->inContentWidget->layout() != nullptr )
+        {
+            ui->inContentWidget->layout()->removeWidget(m_contentWidget);
+            delete m_contentWidget;
+            m_contentWidget = nullptr;
+        }
+
+        m_msgType = msg.items().at(0).type;
+
+        switch (m_msgType)
+        {
+        case BasicDef::MIT_NONE:
+            break;
+        case BasicDef::MIT_TEXT:
+        case BasicDef::MIT_IMAGE:
+        case BasicDef::MIT_GIF:
+        case BasicDef::MIT_EMOTICONS:
+        {
+            auto widget = new MultiText(this);
+            widget->setMessage(msg);
+            m_contentWidget = widget;
+            ui->inContentWidget->layout()->addWidget(m_contentWidget);
+ //           ui->inContentWidget->layout()->widget();
+
+            break;
+        }
+
+        case BasicDef::MIT_VOICE:
+            break;
+
+        case BasicDef::MIT_OFFLINEFILE:
+            break;
+
+        default:
+            break;
+        }
     }
 }
 

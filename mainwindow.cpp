@@ -16,11 +16,22 @@ MainWindow::MainWindow(QWidget *parent) :
     msgItem.type = BasicDef::MIT_TEXT;
     msgItem.count = 1;
 
+    BasicDef::MsgItem msgItemImage;
+    msgItemImage.type = BasicDef::MIT_IMAGE;
+    msgItemImage.count = 1;
+
 
     for(int i=0; i<6; i++)
     {
         msgItem.data = QString("%1").arg(i);
-        msg.setItems(QList<BasicDef::MsgItem>{msgItem});
+        msgItemImage.data = QString("F:\\mygit\\BubbleChat\\pic\\1.jpg");
+
+        msg.setItems(QList<BasicDef::MsgItem>{
+                         msgItem
+                         // ,msgItemImage
+                         , msgItem
+                         , msgItem
+                          });
         msg.setDirection(i%2==0?Message::MessageIn:Message::MessageOut);
         ui->listView->appendMessage(msg);
     }

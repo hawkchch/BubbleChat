@@ -52,8 +52,8 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     connect(m_actionSelect, SIGNAL(triggered()), SLOT(selectAll()));
     m_copyAvailable = false;
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
-   // setReadOnly(true);
-
+    // setReadOnly(true);
+    // setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     qDebug() << "MultiText";
 }
 

@@ -86,11 +86,8 @@ void InMessageForm::setMessage(const Message &msg)
         case BasicDef::MIT_GIF:
         case BasicDef::MIT_EMOTICONS:
         {
-            auto widget = new MultiText(msg, this);
-            m_contentWidget = widget;
+            m_contentWidget = new MultiText(msg, this);
             ui->inContentWidget->layout()->addWidget(m_contentWidget);
- //           ui->inContentWidget->layout()->widget();
-
             break;
         }
 

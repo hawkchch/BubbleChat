@@ -49,6 +49,7 @@ bool ChatMessageSortFilterProxyModel::lessThan(const QModelIndex &ALeft, const Q
 ChatMessageModel::ChatMessageModel(QObject *parent) :
     QStandardItemModel(parent)
 {
+
 }
 
 void ChatMessageModel::appendChatMessage(const Message &msg)

@@ -1,6 +1,8 @@
 #include "chatmessagedelegate.h"
 #include "chatmessageitem.h"
-#include "multitext.h"
+#include "imessageform.h"
+#include "inmessageform.h"
+#include "outmessageform.h"
 #include <QPainter>
 #include <QPushButton>
 #include <QDebug>
@@ -13,72 +15,13 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
     QItemDelegate(parent)
 {
     m_parent = (ChatMessageView* )parent;
+    connect(&m_timerCheck, SIGNAL(timeout()), this, SLOT(timerCheck()));
+    m_timerCheck.start(1000);
 }
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-//    drawDisplay(painter, option, option.rect, QString("Hello World!"));
-//    drawBackground(painter, option, index);
-//    QApplication::style()->drawComplexControl();
-//    return;
-//    const QPushButton btn("TEST");
-
-//    QApplication::style()->drawControl(QStyle::CE_PushButton, &option, painter, &btn);
-//    connect(&btn, &QPushButton::clicked, [&btn](){
-//        btn.setText("OK");
-//    });
-
-//    return;
-
-
-    /*
-    // here we have active painter provided by caller
-
-    // by the way - we can't use painter->save() and painter->restore()
-    // methods cause we have to call painter->end() method before painting
-    // the QWidget, and painter->end() method deletes
-    // the saved parameters of painter
-
-    // we have to save paint device of the provided painter to restore the painter
-    // after drawing QWidget
-    QPaintDevice* original_pdev_ptr = painter->device();
-
-    // example of simple drawing (selection) before widget
-    if (option.state & QStyle::State_Selected)
-        painter->fillRect(option.rect, option.palette.highlight());
-
-    // creating local QWidget (that's why i think it should be fasted, cause we
-    // don't touch the heap and don't deal with a QWidget except painting)
-    QPushButton item_widget;
-
-    item_widget.setText("Hello");
-
-    // Setting some parameters for widget for example
-        // spec. params
-    //item_widget.SetPackageName(index.data(Qt::DisplayRole).toString());
-        // geometry
-    item_widget.setGeometry(option.rect);
-
-    // here we have to finish the painting of provided painter, cause
-    //     1) QWidget::render(QPainter *,...) doesn't work with provided external painter
-    //          and we have to use QWidget::render(QPaintDevice *,...)
-    //          which creates its own painter
-    //     2) two painters can't work with the same QPaintDevice at the same time
-    painter->end();
-
-    // rendering of QWidget itself
-    item_widget.render(painter->device(), QPoint(option.rect.x(), option.rect.y()), QRegion(0, 0, option.rect.width(), option.rect.height()), QWidget::DrawChildren);
-
-    // starting (in fact just continuing) painting with external painter, provided
-    // by caller
-    painter->begin(original_pdev_ptr);
-
-    // example of simple painting after widget
-    painter->drawEllipse(0,0, 10,10);
-
-    return;
-    */
-
+    painter->save();
     if (index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>())
     {
         if (m_parent)
@@ -86,14 +29,13 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
             m_parent->openPersistentEditor(index);
 
             QRect parentRect = m_parent->rect();
+
             int viewStartHeight = parentRect.y();
             int viewEndHeight = parentRect.y() + parentRect.height();
-
             for(int row = 0; row < m_parent->model()->rowCount(); row++)
             {
                 QModelIndex idx = m_parent->model()->index(row, 0);
                 QRect rc = m_parent->visualRect(idx);
-
                 int indexStartHeight = rc.y();
                 if ( indexStartHeight <= viewStartHeight - rc.height()
                      || indexStartHeight >= viewEndHeight + rc.height() )
@@ -107,6 +49,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     {
         QItemDelegate::paint(painter, option, index);
     }
+    painter->restore();
 }
 
 QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -117,9 +60,11 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
         {
             QSize sz;
             sz.setWidth(option.rect.width());
-            if (m_mapHeight.find(index) != m_mapHeight.end() )
+            if (m_mapEditorSize.find(index) != m_mapEditorSize.end() )
             {
-                sz.setHeight(m_mapHeight[index].height());
+                sz.setHeight(m_mapEditorSize[index].height());
+                sz.setWidth(m_mapEditorSize[index].width());
+
                 return sz;
             }
         }
@@ -132,6 +77,9 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 {
 
     QWidget *widget = nullptr;
+    InMessageForm *in = nullptr;
+    OutMessageForm *out = nullptr;
+
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
@@ -142,8 +90,11 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         case BasicDef::MIT_IMAGE:
         case BasicDef::MIT_GIF:
         case BasicDef::MIT_EMOTICONS:
-            widget = new MultiText(msg, parent);
-            m_mapHeight[index] = widget->sizeHint();
+            in = new InMessageForm(parent);
+            in->setMessage(msg);
+            m_mapEditorSize[index] = in->sizeHint();
+            m_mapIndexClock[index] = 0;
+            widget = in;
             break;
 
         case BasicDef::MIT_VOICE:
@@ -157,7 +108,7 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         }
     }
 
-    if(widget != nullptr)
+    if(in != nullptr)
     {
 //        QLabel *avatar = new QLabel;
 //        avatar->setPixmap(QPixmap(QString(":/picture/pic/5.jpg")));
@@ -170,7 +121,7 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 
 //        return frame;
 
-        return widget;
+        return in;
     }
     else
     {
@@ -184,7 +135,7 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     {
         auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
 
-        MultiText* text = qobject_cast<MultiText*>(editor);
+        InMessageForm* text = qobject_cast<InMessageForm*>(editor);
 
         if (text)
         {
@@ -197,30 +148,11 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
     }
 }
 
-//void ChatMessageDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-//{
-//    MultiText* text = qobject_cast<MultiText*>(editor);
-
-//    if (text)
-//    {
-//        int hCell = option.rect.height();
-//        int hEditor = editor->sizeHint().height();
-//        int h = qMax( hCell, hEditor );
-//        QSize size = option.rect.size();
-//        size.setHeight( h );
-//        editor->setGeometry( QRect(option.rect.topLeft(), size));
-//    }
-
-////    QRect rect(option.rect);
-////    editor->setGeometry(rect);
-////    QItemDelegate::updateEditorGeometry(editor, option, index);
-//}
-
 void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
     {
-        MultiText* text = qobject_cast<MultiText*>(editor);
+        InMessageForm* text = qobject_cast<InMessageForm*>(editor);
 
         if (text)
         {
@@ -231,4 +163,22 @@ void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
     {
         QItemDelegate::setModelData(editor, model, index);
     }
+}
+
+bool ChatMessageDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
+{
+    QItemDelegate::editorEvent(event, model, option, index);
+}
+
+void ChatMessageDelegate::timerCheck()
+{
+//    foreach (QModelIndex index, m_mapIndexClock.keys())
+//    {
+//        m_mapIndexClock[index]++;
+//        if( m_parent && m_mapIndexClock[index] >= 5)
+//        {
+//            m_parent->closePersistentEditor(index);
+//            m_mapIndexClock.remove(index);
+//        }
+//    }
 }

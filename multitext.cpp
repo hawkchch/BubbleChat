@@ -51,12 +51,9 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     connect(m_actionSelect, SIGNAL(triggered()), SLOT(selectAll()));
     m_copyAvailable = false;
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
-    setReadOnly(true);
+   // setReadOnly(true);
 
     qDebug() << "MultiText";
-
-    setStyleSheet(QString("border-image: url(:/picture/pic/chat.png) 27;"
-                          "border-width: 27;"));
 }
 
 MultiText::~MultiText()
@@ -116,6 +113,7 @@ QSize MultiText::sizeHint() const
 {
     QSize sh = QTextEdit::sizeHint();
     sh.setHeight(textHeight(!m_autoResize ? m_minimumLines : 0));
+    //qDebug() << "MultiText::sizeHint "<<sh;
     return sh;
 }
 
@@ -129,11 +127,16 @@ QSize MultiText::minimumSizeHint() const
 int MultiText::textHeight(int ALines) const
 {
     if (ALines > 0)
+    {
+//        int fontHeight = fontMetrics().height()*ALines;
+//        int marginHeight = (frameWidth() + qRound(document()->documentMargin()))*2;
+//        qDebug() << "MultiText::textHeight " << fontHeight << marginHeight;
         return fontMetrics().height()*ALines + (frameWidth() + qRound(document()->documentMargin()))*2;
+    }
     else
+    {
         return qRound(document()->documentLayout()->documentSize().height()) + frameWidth()*2;
-
-
+    }
 }
 
 bool MultiText::canInsertFromMimeData(const QMimeData *ASource) const
@@ -437,6 +440,9 @@ void MultiText::setMessage(const Message &msg)
             break;
         }
     }
+
+//    update();
+//    updateGeometry();
 }
 
 Message MultiText::message() const

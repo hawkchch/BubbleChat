@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     message.cpp \
     chatmessagedelegate.cpp \
     multitext.cpp \
-    chatmessageview.cpp
+    chatmessageview.cpp \
+    inmessageform.cpp \
+    outmessageform.cpp
 
 HEADERS  += mainwindow.h \
     chatmessageitem.h \
@@ -28,9 +30,14 @@ HEADERS  += mainwindow.h \
     msgdef.h \
     chatmessagedelegate.h \
     multitext.h \
-    chatmessageview.h
+    chatmessageview.h \
+    inmessageform.h \
+    outmessageform.h \
+    imessageform.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    inmessageform.ui \
+    outmessageform.ui
 
 CONFIG   += c++11
 

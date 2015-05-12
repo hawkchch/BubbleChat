@@ -7,5 +7,6 @@
         <file>pic/5.jpg</file>
         <file>pic/6.jpg</file>
         <file>pic/chat.png</file>
+        <file>pic/avatar.png</file>
     </qresource>
 </RCC>

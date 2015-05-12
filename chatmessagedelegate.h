@@ -3,7 +3,8 @@
 
 #include <QStyledItemDelegate>
 #include <QItemDelegate>
-
+#include <QTimer>
+#include <QTime>
 
 class ChatMessageView;
 
@@ -30,21 +31,23 @@ public:
     void setModelData(QWidget *editor,
                       QAbstractItemModel *model,
                       const QModelIndex &index) const;
-
-//    void updateEditorGeometry(QWidget *editor,
-//                              const QStyleOptionViewItem &option,
-//                              const QModelIndex &index) const;
-
+protected:
+    bool editorEvent(QEvent *event, QAbstractItemModel *model,
+                     const QStyleOptionViewItem &option, const QModelIndex &index);
 signals:
-    void indexSize(QModelIndex, QSize);
+
 
 public slots:
+
+private slots:
+    void timerCheck();
 
 private:
     ChatMessageView *m_parent;
 
-    mutable QMap<QModelIndex, QSize> m_mapHeight;
-
+    mutable QMap<QModelIndex, QSize>  m_mapEditorSize;
+    mutable QMap<QModelIndex, qint64> m_mapIndexClock;
+    QTimer m_timerCheck;
 };
 
 #endif // CHATMESSAGEDELEGATE_H

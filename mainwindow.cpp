@@ -21,16 +21,17 @@ MainWindow::MainWindow(QWidget *parent) :
     msgItemImage.count = 1;
 
 
-    for(int i=0; i<6; i++)
+    for(int i=0; i<2; i++)
     {
-        msgItem.data = QString("%1").arg(i);
-        msgItemImage.data = QString("F:\\mygit\\BubbleChat\\pic\\1.jpg");
+        msgItem.data = QString("%1 "
+                               "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW").arg(i);
+        msgItemImage.data = QString("D:\\mygit\\BubbleChat\\pic\\1.jpg");
 
         msg.setItems(QList<BasicDef::MsgItem>{
                          msgItem
-                         // ,msgItemImage
-                         , msgItem
-                         , msgItem
+//                         , msgItemImage
+//                         , msgItem
+//                         , msgItem
                           });
         msg.setDirection(i%2==0?Message::MessageIn:Message::MessageOut);
         ui->listView->appendMessage(msg);

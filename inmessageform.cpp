@@ -109,11 +109,10 @@ QSize InMessageForm::sizeHint() const
     if(m_contentWidget)
     {
         size = m_contentWidget->sizeHint();
-        size.setHeight(size.height()+9*5);
+        size.setHeight(size.height()+4*9+25 + 54);
     }
 
     return size;
-
 }
 
 QSize InMessageForm::minimumSizeHint() const

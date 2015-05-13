@@ -35,7 +35,14 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     m_autoResize = false;
     m_minimumLines = 4;
 
-    setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    auto sp = QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    //sp.setWidthForHeight(true);
+    //sp.setHeightForWidth(true);
+    setSizePolicy(sp);
+
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     connect(this,SIGNAL(textChanged()),SLOT(onTextChanged()));
 
     clear();
@@ -52,8 +59,13 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     connect(m_actionSelect, SIGNAL(triggered()), SLOT(selectAll()));
     m_copyAvailable = false;
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
+    connect(this->document(), &QTextDocument::contentsChanged, [this]()
+    {
+        qDebug() << "QTextDocument::contentsChanged";
+        document()->adjustSize();
+    });
+
     // setReadOnly(true);
-    // setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     qDebug() << "MultiText";
 }
 
@@ -112,6 +124,11 @@ void MultiText::setMinimumLines(int ALines)
 
 QSize MultiText::sizeHint() const
 {
+    //document()->adjustSize();
+    //qDebug() << "MultiText::sizeHint" << document()->size().toSize();
+    return document()->size().toSize();
+
+
     QSize sh = QTextEdit::sizeHint();
     sh.setHeight(textHeight(!m_autoResize ? m_minimumLines : 0));
     //qDebug() << "MultiText::sizeHint "<<sh;
@@ -129,9 +146,6 @@ int MultiText::textHeight(int ALines) const
 {
     if (ALines > 0)
     {
-//        int fontHeight = fontMetrics().height()*ALines;
-//        int marginHeight = (frameWidth() + qRound(document()->documentMargin()))*2;
-//        qDebug() << "MultiText::textHeight " << fontHeight << marginHeight;
         return fontMetrics().height()*ALines + (frameWidth() + qRound(document()->documentMargin()))*2;
     }
     else
@@ -224,8 +238,8 @@ void MultiText::setCopyAvailable(bool copyAvailable)
 
 void MultiText::contextMenuEvent(QContextMenuEvent *event)
 {
-    qDebug() << "MessageEditor copy available: " << m_copyAvailable;
-    qDebug() << "MessageEditor paste available: " << canPaste();
+//    qDebug() << "MessageEditor copy available: " << m_copyAvailable;
+//    qDebug() << "MessageEditor paste available: " << canPaste();
     QMenu *menu = createStandardContextMenu();
     menu->clear();
     if (m_copyAvailable)
@@ -392,22 +406,12 @@ void MultiText::setMessage(const Message &msg)
                 localFileName = localFileName.mid(localFileName.lastIndexOf("/") + 1);
             }
             imageFile = localFileName;//m_chatImagePath + "/" + localFileName;
-            //QFile file(imageFile);
             file.setFileName(imageFile);
             if(file.exists())
             {
-                //imgHtml = QString("<img src=\"%1\" />").arg(QUrl::fromLocalFile(imageFile).toString());
                 appendImage(QUrl::fromLocalFile(imageFile).toString());
             }
-//            else
-//            {
-//                QString imageId = QString("image_%1_%2").arg(QDateTime::currentMSecsSinceEpoch()).arg(QString::number(qrand()));
-//                imgHtml = QString("<img src=%1 />").arg(imageId);
-//                m_imageUrls[imageId] = QUrl::fromLocalFile(imageFile).toString();
-//                imageIds.append(imageId);
-//                //qDebug() << "AdiumStyleWidget image file not exeist! image id = " << imageId;
-//                emit chatImageGet(item.data, imageId);
-//            }
+
             break;
 
         case BasicDef::MIT_EMOTICONS:
@@ -442,8 +446,8 @@ void MultiText::setMessage(const Message &msg)
         }
     }
 
-//    update();
-//    updateGeometry();
+    update();
+    updateGeometry();
 }
 
 Message MultiText::message() const

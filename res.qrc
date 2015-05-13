@@ -8,5 +8,6 @@
         <file>pic/6.jpg</file>
         <file>pic/chat.png</file>
         <file>pic/avatar.png</file>
+        <file>pic/back.jpg</file>
     </qresource>
 </RCC>

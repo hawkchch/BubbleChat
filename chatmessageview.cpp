@@ -13,6 +13,8 @@ ChatMessageView::ChatMessageView(QWidget *parent)
     setModel(m_sourceModel);
 
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    setResizeMode(QListView::Adjust);
+    setLayoutMode(QListView::Batched);
 }
 
 ChatMessageView::~ChatMessageView()

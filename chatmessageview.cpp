@@ -1,5 +1,7 @@
 #include "chatmessageview.h"
 #include <qdebug.h>
+#include <QScrollBar>
+
 ChatMessageView::ChatMessageView(QWidget *parent)
     :QListView(parent)
 {
@@ -15,6 +17,7 @@ ChatMessageView::ChatMessageView(QWidget *parent)
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     setResizeMode(QListView::Adjust);
     setLayoutMode(QListView::Batched);
+    setUpdatesEnabled(true);
 }
 
 ChatMessageView::~ChatMessageView()

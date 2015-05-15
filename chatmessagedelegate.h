@@ -32,10 +32,6 @@ public:
                       QAbstractItemModel *model,
                       const QModelIndex &index) const;
 
-//    void updateEditorGeometry(QWidget *editor,
-//                              const QStyleOptionViewItem &option,
-//                              const QModelIndex &index) const;
-
 protected:
     bool editorEvent(QEvent *event, QAbstractItemModel *model,
                      const QStyleOptionViewItem &option, const QModelIndex &index);
@@ -51,7 +47,13 @@ private:
     ChatMessageView *m_parent;
 
     mutable QMap<QModelIndex, qint64> m_mapIndexClock;
-    mutable QMap<QModelIndex, QWidget*> m_mapEditor;
+
+    struct PrivateData
+    {
+        QWidget *editor;
+        QSize   lastSize;
+    };
+    mutable QMap<QModelIndex, PrivateData> m_mapEditor;
     QTimer m_timerCheck;
 };
 

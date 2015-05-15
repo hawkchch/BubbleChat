@@ -18,7 +18,6 @@ public:
     void appendMessage(const Message& msg);
     void appendMessages(const QList<Message>& msgs);
 
-
 signals:
 
 public slots:

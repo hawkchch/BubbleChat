@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>562</width>
-    <height>400</height>
+    <width>498</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,14 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="ChatMessageView" name="listView"/>
+     <widget class="ChatMessageView" name="listView">
+      <property name="minimumSize">
+       <size>
+        <width>480</width>
+        <height>320</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -25,8 +32,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>562</width>
-     <height>23</height>
+     <width>498</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

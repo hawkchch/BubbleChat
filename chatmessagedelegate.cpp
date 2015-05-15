@@ -36,27 +36,27 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
             //qDebug() << "openPersistentEditor index row: " << index.row();
             //m_mapIndexClock[index] = 0;
 
-//            QRect parentRect = m_parent->rect();
+            QRect parentRect = m_parent->rect();
 
-//            int viewStartHeight = parentRect.y();
-//            int viewEndHeight = parentRect.y() + parentRect.height();
-//            for(int row = 0; row < m_parent->model()->rowCount(); row++)
-//            {
-//                QModelIndex idx = m_parent->model()->index(row, 0);
-//                QRect rc = m_parent->visualRect(idx);
-//                int indexStartHeight = rc.y();
-//                if ( indexStartHeight <= viewStartHeight - rc.height()
-//                     || indexStartHeight >= viewEndHeight + rc.height() )
-//                {
-//                    //if(m_mapIndexClock[idx] >= 10)
-//                    {
-//                        //m_parent->closePersistentEditor(idx);
-//                        //m_mapIndexClock.remove(idx);
-//                        //m_mapEditor[idx] = nullptr;
-//                        //qDebug() << "closePersistentEditor index row: " << idx.row();
-//                    }
-//                }
-//            }
+            int viewStartHeight = parentRect.y();
+            int viewEndHeight = parentRect.y() + parentRect.height();
+            for(int row = 0; row < m_parent->model()->rowCount(); row++)
+            {
+                QModelIndex idx = m_parent->model()->index(row, 0);
+                QRect rc = m_parent->visualRect(idx);
+                int indexStartHeight = rc.y();
+                if ( indexStartHeight <= viewStartHeight - rc.height()
+                     || indexStartHeight >= viewEndHeight + rc.height() )
+                {
+                    //if(m_mapIndexClock[idx] >= 10)
+                    {
+                        m_parent->closePersistentEditor(idx);
+                        //m_mapIndexClock.remove(idx);
+                        m_mapEditor[idx].editor = nullptr;
+                        qDebug() << "closePersistentEditor index row: " << idx.row();
+                    }
+                }
+            }
         }
     }
     else
@@ -71,16 +71,20 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     {
         if ( index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>() )
         {
-            if (m_mapEditor.find(index) != m_mapEditor.end())
+            if (m_mapEditor.contains(index))
             {
-                if (m_mapEditor[index] != nullptr)
+                if (m_mapEditor[index].editor != nullptr)
                 {
-                    auto sz = m_mapEditor[index]->sizeHint();
-                    sz.setWidth(option.rect.width());
+                    auto sz = m_mapEditor[index].editor->sizeHint();
+                    sz.setWidth(m_parent->width()-50);
+                    m_mapEditor[index].lastSize = sz;
                     //auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
                     qDebug() << "ChatMessageDelegate::sizeHint " << sz;// << "msg:" << msg.items().at(0).data;
                     return sz;
-                    //return m_mapEditor[index]->sizeHint();
+                }
+                else
+                {
+                    return m_mapEditor[index].lastSize;
                 }
             }
         }
@@ -104,7 +108,7 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
         {
             editor = new OutMessageForm(parent);
         }
-        m_mapEditor[index] = editor;
+        m_mapEditor[index].editor = editor;
         return editor;
     }
 

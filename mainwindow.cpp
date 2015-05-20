@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
     msgItemImage.type = BasicDef::MIT_IMAGE;
     msgItemImage.count = 1;
 
+    BasicDef::MsgItem msgItemGif;
+    msgItemGif.type = BasicDef::MIT_GIF;
+    msgItemGif.count = 1;
 
     for(int i=0; i<10; i++)
     {
@@ -27,9 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
                                "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW").arg(i);
         msgItemImage.data = QString("D:\\mygit\\BubbleChat\\pic\\1.jpg");
 
+        msgItemGif.data = ":/picture/pic/play.gif";
+
         msg.setItems(QList<BasicDef::MsgItem>{
                          msgItem
-//                         , msgItemImage
+                         , msgItemImage
+//                         , msgItemGif
 //                         , msgItem
 //                         , msgItem
                           });

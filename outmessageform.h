@@ -8,7 +8,7 @@ namespace Ui {
 class OutMessageForm;
 }
 
-class OutMessageForm : public QWidget
+class OutMessageForm : public QWidget, IMessageForm
 {
     Q_OBJECT
 

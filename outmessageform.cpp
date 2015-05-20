@@ -8,12 +8,6 @@ OutMessageForm::OutMessageForm(QWidget *parent) :
     ui(new Ui::OutMessageForm)
 {
     ui->setupUi(this);
-
-    m_contentWidget = nullptr;
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    ui->outContentWidget->setLayout(layout);
 }
 
 OutMessageForm::~OutMessageForm()
@@ -66,14 +60,6 @@ void OutMessageForm::setMessage(const Message &msg)
 {
     if ( msg.items().length() > 0 && msg.direction() == Message::MessageOut )
     {
-        if ( m_contentWidget
-            && ui->outContentWidget->layout() != nullptr )
-        {
-            ui->outContentWidget->layout()->removeWidget(m_contentWidget);
-            delete m_contentWidget;
-            m_contentWidget = nullptr;
-        }
-
         m_msgType = msg.items().at(0).type;
 
         switch (m_msgType)
@@ -85,10 +71,15 @@ void OutMessageForm::setMessage(const Message &msg)
         case BasicDef::MIT_GIF:
         case BasicDef::MIT_EMOTICONS:
         {
-            auto widget = new MultiText(msg, this);
-            m_contentWidget = widget;
-            ui->outContentWidget->layout()->addWidget(m_contentWidget);
+            m_contentWidget = new MultiText(msg, this);
+            m_contentWidget->setStyleSheet("border-image: url(:/picture/pic/chat.png) 27 27 27 27;"
+                                           "border-width: 27 27 27 27;");
 
+            QHBoxLayout *hLayout = qobject_cast<QHBoxLayout*>(ui->bubble->layout());
+            if(hLayout)
+            {
+                hLayout->insertWidget(1, m_contentWidget, 1);
+            }
             break;
         }
 

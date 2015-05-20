@@ -1,6 +1,8 @@
 #include "chatmessageview.h"
 #include <qdebug.h>
 #include <QScrollBar>
+#include <QWheelEvent>
+#include <QApplication>
 
 ChatMessageView::ChatMessageView(QWidget *parent)
     :QListView(parent)
@@ -18,6 +20,8 @@ ChatMessageView::ChatMessageView(QWidget *parent)
     setResizeMode(QListView::Adjust);
     setLayoutMode(QListView::Batched);
     setUpdatesEnabled(true);
+
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 ChatMessageView::~ChatMessageView()
@@ -36,6 +40,33 @@ void ChatMessageView::appendMessages(const QList<Message> &msgs)
     foreach(Message msg, msgs)
     {
         appendMessage(msg);
+    }
+}
+
+void ChatMessageView::wheelEvent(QWheelEvent *event)
+{
+    return;
+    qDebug() << "ChatMessageView::wheelEvent";
+    // 暂时鼠标滚轮有问题
+    if(event->orientation() == Qt::Vertical)
+    {
+        QPoint numPixels = event->pixelDelta();
+        QPoint numDegrees = event->angleDelta()/8;
+
+
+        if (!numPixels.isNull()) {
+            //qDebug() << "pixelDelta";
+            scrollContentsBy(0, numPixels.y());
+            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - numPixels.y());
+        } else if (!numDegrees.isNull()) {
+            //qDebug() << "angleDelta" << numDegrees;
+            QPoint numSteps = numDegrees / 15;
+            //qDebug() << numSteps;
+            scrollContentsBy(0, numSteps.y());
+            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - numSteps.y());
+        }
+
+        event->accept();
     }
 }
 

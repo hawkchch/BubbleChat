@@ -27,18 +27,12 @@ static const int HUHOO_FACE_COUNT = 15;
 MultiText::MultiText(const Message &msg, QWidget *parent) : MultiText(parent)
 {
     setMessage(msg);
-    qDebug() << msg.items().at(0).data;
+    //qDebug() << msg.items().at(0).data;
 }
 
 MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
 {
-    m_autoResize = false;
-    m_minimumLines = 4;
-
-    auto sp = QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //sp.setWidthForHeight(true);
-    //sp.setHeightForWidth(true);
-    setSizePolicy(sp);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -61,12 +55,13 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
     connect(this->document(), &QTextDocument::contentsChanged, [this]()
     {
-        qDebug() << "QTextDocument::contentsChanged";
+        //qDebug() << "QTextDocument::contentsChanged";
         document()->adjustSize();
+//      setMaximumWidth(document()->idealWidth()+10);
     });
 
-    // setReadOnly(true);
-    qDebug() << "MultiText";
+    setReadOnly(true);
+    //qDebug() << "MultiText";
 }
 
 MultiText::~MultiText()
@@ -77,7 +72,7 @@ MultiText::~MultiText()
     }
     m_facesMap.clear();
 
-    qDebug() << "~MultiText";
+    //qDebug() << "~MultiText";
 }
 
 
@@ -94,51 +89,38 @@ void MultiText::clear()
     QTextEdit::clear();
 }
 
-bool MultiText::autoResize() const
+void MultiText::resizeEvent(QResizeEvent * event)
 {
-    return m_autoResize;
-}
+    int fontSize = qMax<int>(font().pixelSize(), font().pointSize());
+    int fWidth = frameWidth()*2;
+//    qDebug() << "textedit size:" << size();
+//    qDebug() << "event size:" << event->size() << " event oldSize:" << event->oldSize();
+//    qDebug() << "document size:" << document()->size().toSize();
+//    qDebug() << "document idealWidth:" << document()->idealWidth();
+//    qDebug() << "fontSize:" << fontSize << " frameWidth:" << fWidth;
+//    qDebug() << "-------------------MultiText::resizeEvent------------------------";
 
-void MultiText::setAutoResize(bool AResize)
-{
-    if (AResize != m_autoResize)
+    if(document()->size().width() >= document()->idealWidth() + fontSize + fWidth )
     {
-        m_autoResize = AResize;
-        updateGeometry();
+        setMaximumWidth(int(document()->idealWidth()) + fontSize + fWidth + 1);
     }
-}
 
-int MultiText::minimumLines() const
-{
-    return m_minimumLines;
-}
-
-void MultiText::setMinimumLines(int ALines)
-{
-    if (ALines != m_minimumLines)
-    {
-        m_minimumLines = ALines>0 ? ALines : 1;
-        updateGeometry();
-    }
+    QTextEdit::resizeEvent(event);
 }
 
 QSize MultiText::sizeHint() const
 {
-    //document()->adjustSize();
-    //qDebug() << "MultiText::sizeHint" << document()->size().toSize();
-    return document()->size().toSize();
-
-
-    QSize sh = QTextEdit::sizeHint();
-    sh.setHeight(textHeight(!m_autoResize ? m_minimumLines : 0));
-    //qDebug() << "MultiText::sizeHint "<<sh;
-    return sh;
+    //qDebug() << "MultiText::sizeHint";
+    QSize sz = document()->size().toSize();
+    //sz.setWidth(int(document()->idealWidth()));
+    return sz;
 }
 
 QSize MultiText::minimumSizeHint() const
 {
+    //qDebug() << "MultiText::minimumSizeHint";
     QSize sh = QTextEdit::minimumSizeHint();
-    sh.setHeight(textHeight(m_minimumLines));
+    sh.setHeight(textHeight(1));
     return sh;
 }
 
@@ -381,7 +363,10 @@ void MultiText::setEmoticonsPath(QString path)
 
 void MultiText::setMessage(const Message &msg)
 {
-    clear();
+    if(!document()->isEmpty())
+    {
+        clear();
+    }
     m_message = msg;
     for(int i=0; i<msg.items().count(); i++)
     {

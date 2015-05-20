@@ -23,7 +23,7 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    qDebug() << "ChatMessageDelegate::paint" << option.rect;
+    //qDebug() << "ChatMessageDelegate::paint" << option.rect;
     //drawDecoration(painter, option, option.rect, QPixmap(":/picture/pic/back.jpg"));
     if (index.data(ChatMessageItem::DATA_ROLE_MESSAGE).canConvert<Message>())
     {
@@ -31,6 +31,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         {
             m_parent->openPersistentEditor(index);
 
+            return ;
 
             painter->drawLine(option.rect.x(), option.rect.y(), option.rect.x()+option.rect.width(), option.rect.y());
             //qDebug() << "openPersistentEditor index row: " << index.row();
@@ -53,7 +54,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
                         m_parent->closePersistentEditor(idx);
                         //m_mapIndexClock.remove(idx);
                         m_mapEditor[idx].editor = nullptr;
-                        qDebug() << "closePersistentEditor index row: " << idx.row();
+                        //qDebug() << "closePersistentEditor index row: " << idx.row();
                     }
                 }
             }
@@ -76,10 +77,10 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
                 if (m_mapEditor[index].editor != nullptr)
                 {
                     auto sz = m_mapEditor[index].editor->sizeHint();
-                    sz.setWidth(m_parent->width()-50);
+                    //sz.setWidth(m_parent->width()-50);
                     m_mapEditor[index].lastSize = sz;
                     //auto msg = index.data(ChatMessageItem::DATA_ROLE_MESSAGE).value<Message>();
-                    qDebug() << "ChatMessageDelegate::sizeHint " << sz;// << "msg:" << msg.items().at(0).data;
+                    //qDebug() << "ChatMessageDelegate::sizeHint " << sz;// << "msg:" << msg.items().at(0).data;
                     return sz;
                 }
                 else
@@ -109,6 +110,7 @@ QWidget *ChatMessageDelegate::createEditor(QWidget *parent, const QStyleOptionVi
             editor = new OutMessageForm(parent);
         }
         m_mapEditor[index].editor = editor;
+        m_mapIndexClock[index] = 0;
         return editor;
     }
 
@@ -129,7 +131,6 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
             if (widget)
             {
                 widget->setMessage(msg);
-                //m_mapIndexClock[index] = 0;
             }
         }
         else
@@ -139,7 +140,6 @@ void ChatMessageDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
             if (widget)
             {
                 widget->setMessage(msg);
-                //m_mapIndexClock[index] = 0;
             }
         }
     }
@@ -181,10 +181,6 @@ void ChatMessageDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
     }
 }
 
-//void ChatMessageDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-//{
-//    //editor->updateGeometry();
-//}
 
 bool ChatMessageDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {

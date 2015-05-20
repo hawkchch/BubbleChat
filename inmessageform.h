@@ -24,7 +24,7 @@ public:
     // QWidget
     virtual QSize sizeHint() const;
     virtual QSize minimumSizeHint() const;
-
+    virtual void paintEvent(QPaintEvent *e);
 
 private:
     Ui::InMessageForm *ui;

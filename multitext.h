@@ -15,14 +15,9 @@ public:
     void setMessage(const Message& msg);
     Message message() const;
 
-    bool autoResize() const;
-    void setAutoResize(bool AResize);
-    int minimumLines() const;
-    void setMinimumLines(int ALines);
     void clear();
     QStringList pasteImgFilenames(){return m_pasteImgList;}
     void setEmoticonsPath(QString path);
-
 
 public slots:
     void insertFace(int idx, bool addImgElement = true);
@@ -54,6 +49,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *e);
     void contextMenuEvent(QContextMenuEvent *event);
     void keyPressEvent(QKeyEvent *e);
+    void resizeEvent(QResizeEvent * event);
 
 protected slots:
     void onTextChanged();
@@ -65,8 +61,6 @@ private:
     void appendHuhooFace(int idx);
 
 private:
-    bool m_autoResize;
-    int  m_minimumLines;
     QAction* m_actionCopyImage;
     QAction* m_actionSaveIamge;
     QAction* m_actionCopy;

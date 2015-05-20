@@ -1,7 +1,11 @@
 #include "inmessageform.h"
 #include "ui_inmessageform.h"
 #include <QHBoxLayout>
-
+#include <qevent.h>
+#include <QDebug>
+#include <QTextDocument>
+#include <QTextEdit>
+#include <QPainter>
 #include "multitext.h"
 
 InMessageForm::InMessageForm(QWidget *parent) :
@@ -9,12 +13,6 @@ InMessageForm::InMessageForm(QWidget *parent) :
     ui(new Ui::InMessageForm)
 {
     ui->setupUi(this);
-
-    m_contentWidget = nullptr;
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    ui->inContentWidget->setLayout(layout);
 }
 
 InMessageForm::~InMessageForm()
@@ -67,14 +65,6 @@ void InMessageForm::setMessage(const Message &msg)
 {
     if ( msg.items().length() > 0 && msg.direction() == Message::MessageIn )
     {
-        if ( m_contentWidget
-            && ui->inContentWidget->layout() != nullptr )
-        {
-            ui->inContentWidget->layout()->removeWidget(m_contentWidget);
-            delete m_contentWidget;
-            m_contentWidget = nullptr;
-        }
-
         m_msgType = msg.items().at(0).type;
 
         switch (m_msgType)
@@ -87,7 +77,15 @@ void InMessageForm::setMessage(const Message &msg)
         case BasicDef::MIT_EMOTICONS:
         {
             m_contentWidget = new MultiText(msg, this);
-            ui->inContentWidget->layout()->addWidget(m_contentWidget);
+            m_contentWidget->setStyleSheet("border-image: url(:/picture/pic/chat.png) 27 27 27 27;"
+                                           "border-width: 27 27 27 27;");
+
+            QHBoxLayout *hLayout = qobject_cast<QHBoxLayout*>(ui->bubble->layout());
+            if(hLayout)
+            {
+                hLayout->insertWidget(0, m_contentWidget, 1);
+            }
+
             break;
         }
 
@@ -101,6 +99,8 @@ void InMessageForm::setMessage(const Message &msg)
             break;
         }
     }
+
+    updateGeometry();
 }
 
 QSize InMessageForm::sizeHint() const
@@ -124,4 +124,14 @@ QSize InMessageForm::minimumSizeHint() const
     }
 
     return size;
+}
+
+void InMessageForm::paintEvent(QPaintEvent *e)
+{
+    QStyleOption opt;
+
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+    QWidget::paintEvent(e);
 }

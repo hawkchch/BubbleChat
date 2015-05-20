@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     multitext.cpp \
     chatmessageview.cpp \
     inmessageform.cpp \
-    outmessageform.cpp
+    outmessageform.cpp \
+    voiceplayer.cpp
 
 HEADERS  += mainwindow.h \
     chatmessageitem.h \
@@ -33,11 +34,13 @@ HEADERS  += mainwindow.h \
     chatmessageview.h \
     inmessageform.h \
     outmessageform.h \
-    imessageform.h
+    imessageform.h \
+    voiceplayer.h
 
 FORMS    += mainwindow.ui \
     inmessageform.ui \
-    outmessageform.ui
+    outmessageform.ui \
+    voiceplayer.ui
 
 CONFIG   += c++11
 

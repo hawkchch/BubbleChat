@@ -9,5 +9,9 @@
         <file>pic/chat.png</file>
         <file>pic/avatar.png</file>
         <file>pic/back.jpg</file>
+        <file>pic/play.gif</file>
+        <file>pic/ready.png</file>
+        <file>pic/rightPlay.gif</file>
+        <file>pic/rightReady.png</file>
     </qresource>
 </RCC>

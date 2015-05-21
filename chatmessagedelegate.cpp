@@ -19,6 +19,8 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent) :
     connect(&m_timerCheck, SIGNAL(timeout()), this, SLOT(timerCheck()));
     m_timerCheck.start(1000);
     setClipping(false);
+    m_createInRealTime = false;
+    //m_createInRealTime = true;
 }
 
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -30,12 +32,14 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         if (m_parent)
         {
             m_parent->openPersistentEditor(index);
-
-            return ;
-
             painter->drawLine(option.rect.x(), option.rect.y(), option.rect.x()+option.rect.width(), option.rect.y());
             //qDebug() << "openPersistentEditor index row: " << index.row();
             //m_mapIndexClock[index] = 0;
+
+            if(!m_createInRealTime)
+            {
+                return;
+            }
 
             QRect parentRect = m_parent->rect();
 
@@ -194,3 +198,13 @@ void ChatMessageDelegate::timerCheck()
 //        m_mapIndexClock[index]++;
 //    }
 }
+bool ChatMessageDelegate::createInRealTime() const
+{
+    return m_createInRealTime;
+}
+
+void ChatMessageDelegate::setCreateInRealTime(bool createInRealTime)
+{
+    m_createInRealTime = createInRealTime;
+}
+

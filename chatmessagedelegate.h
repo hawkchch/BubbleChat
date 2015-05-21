@@ -14,6 +14,9 @@ class ChatMessageDelegate : public QItemDelegate
 public:
     explicit ChatMessageDelegate(QObject *parent = 0);
 
+
+
+
     void paint(QPainter *painter,
                const QStyleOptionViewItem &option,
                const QModelIndex &index) const;
@@ -31,6 +34,9 @@ public:
     void setModelData(QWidget *editor,
                       QAbstractItemModel *model,
                       const QModelIndex &index) const;
+
+    bool createInRealTime() const;
+    void setCreateInRealTime(bool createInRealTime);
 
 protected:
     bool editorEvent(QEvent *event, QAbstractItemModel *model,
@@ -55,6 +61,7 @@ private:
     };
     mutable QMap<QModelIndex, PrivateData> m_mapEditor;
     QTimer m_timerCheck;
+    bool   m_createInRealTime;
 };
 
 #endif // CHATMESSAGEDELEGATE_H

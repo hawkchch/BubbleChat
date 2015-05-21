@@ -23,7 +23,7 @@ signals:
 public slots:
 
 protected:
-    void wheelEvent(QWheelEvent *event);
+    //void wheelEvent(QWheelEvent *event);
 
 private:
     ChatMessageModel *m_sourceModel;

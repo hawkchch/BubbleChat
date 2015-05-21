@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
                          , msgItemImage
 //                         , msgItemGif
 //                         , msgItem
-//                         , msgItem
+                         , msgItem
                           });
         msg.setDirection(i%2==0?Message::MessageIn:Message::MessageOut);
         ui->listView->appendMessage(msg);

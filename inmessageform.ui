@@ -23,6 +23,9 @@
    <property name="topMargin">
     <number>0</number>
    </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QWidget" name="avatar" native="true">
      <property name="minimumSize">
@@ -130,7 +133,7 @@
       </item>
       <item>
        <widget class="QWidget" name="bubble" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0">
          <property name="spacing">
           <number>0</number>
          </property>

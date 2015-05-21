@@ -72,8 +72,10 @@ void OutMessageForm::setMessage(const Message &msg)
         case BasicDef::MIT_EMOTICONS:
         {
             m_contentWidget = new MultiText(msg, this);
-            m_contentWidget->setStyleSheet("border-image: url(:/picture/pic/chat.png) 27 27 27 27;"
-                                           "border-width: 27 27 27 27;");
+            m_contentWidget->setObjectName("outMultiText");
+            m_contentWidget->setStyleSheet("#outMultiText{border-image: url(:/picture/pic/chat.png) 27 27 27 27;"
+                                           "border-width: 27 27 27 27;"
+                                           "padding: -25 -25 -25 -25;}");
 
             QHBoxLayout *hLayout = qobject_cast<QHBoxLayout*>(ui->bubble->layout());
             if(hLayout)
@@ -101,7 +103,8 @@ QSize OutMessageForm::sizeHint() const
     if(m_contentWidget)
     {
         size = m_contentWidget->sizeHint();
-        size.setHeight(size.height()+4*9+25+54);
+        size.setHeight(size.height()+25);
+        //size.setHeight(size.height()+4*9+25+54);
     }
 
     return size;

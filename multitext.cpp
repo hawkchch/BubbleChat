@@ -19,6 +19,8 @@
 #include <QtXml/QDomDocument>
 #include <QTextCursor>
 #include <QDebug>
+#include <QStyleOption>
+#include <QPainter>
 #include "message.h"
 
 static const int BASE_FACE_COUNT = 42;
@@ -55,9 +57,8 @@ MultiText::MultiText(QWidget *parent) : QTextEdit(parent)
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
     connect(this->document(), &QTextDocument::contentsChanged, [this]()
     {
-        //qDebug() << "QTextDocument::contentsChanged";
+        //qDebug() << "QTextDocument::contentsChanged, document size adjust before:"<<document()->size();
         document()->adjustSize();
-//      setMaximumWidth(document()->idealWidth()+10);
     });
 
     setReadOnly(true);
@@ -92,17 +93,27 @@ void MultiText::clear()
 void MultiText::resizeEvent(QResizeEvent * event)
 {
     int fontSize = qMax<int>(font().pixelSize(), font().pointSize());
-    int fWidth = frameWidth()*2;
+//    int fWidth = frameWidth()*2;
+//    qDebug() <<"=======" << m_message.items()[0].data;
 //    qDebug() << "textedit size:" << size();
 //    qDebug() << "event size:" << event->size() << " event oldSize:" << event->oldSize();
 //    qDebug() << "document size:" << document()->size().toSize();
 //    qDebug() << "document idealWidth:" << document()->idealWidth();
 //    qDebug() << "fontSize:" << fontSize << " frameWidth:" << fWidth;
+//    qDebug() << "maximum width:" << maximumWidth();
+//    qDebug() << "document textWidth:" << document()->textWidth();
 //    qDebug() << "-------------------MultiText::resizeEvent------------------------";
 
-    if(document()->size().width() >= document()->idealWidth() + fontSize + fWidth )
+    if(document()->size().width() >= document()->idealWidth() + fontSize + document()->documentMargin()*2  )
     {
-        setMaximumWidth(int(document()->idealWidth()) + fontSize + fWidth + 1);
+        setMaximumWidth(int(document()->idealWidth()) + fontSize + document()->documentMargin()*2 );
+    }
+
+    if(!event->oldSize().isValid())
+    {
+        resize(event->size());
+        update();
+        updateGeometry();
     }
 
     QTextEdit::resizeEvent(event);
@@ -112,7 +123,7 @@ QSize MultiText::sizeHint() const
 {
     //qDebug() << "MultiText::sizeHint";
     QSize sz = document()->size().toSize();
-    //sz.setWidth(int(document()->idealWidth()));
+    sz.setWidth(int(document()->idealWidth()));
     return sz;
 }
 

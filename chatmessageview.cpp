@@ -43,30 +43,32 @@ void ChatMessageView::appendMessages(const QList<Message> &msgs)
     }
 }
 
-void ChatMessageView::wheelEvent(QWheelEvent *event)
-{
-    return;
-    qDebug() << "ChatMessageView::wheelEvent";
-    // 暂时鼠标滚轮有问题
-    if(event->orientation() == Qt::Vertical)
-    {
-        QPoint numPixels = event->pixelDelta();
-        QPoint numDegrees = event->angleDelta()/8;
+//void ChatMessageView::wheelEvent(QWheelEvent *event)
+//{
+//    qDebug() << "ChatMessageView::wheelEvent" << event->pos() << event->globalPos();
+//    // 暂时鼠标滚轮有问题
+//    if(event->orientation() == Qt::Vertical)
+//    {
+//        QPoint numPixels = event->pixelDelta();
+//        QPoint numDegrees = event->angleDelta()/8;
 
+//        qDebug() << contentsRect() << verticalScrollBar()->minimum() << verticalScrollBar()->maximum();
 
-        if (!numPixels.isNull()) {
-            //qDebug() << "pixelDelta";
-            scrollContentsBy(0, numPixels.y());
-            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - numPixels.y());
-        } else if (!numDegrees.isNull()) {
-            //qDebug() << "angleDelta" << numDegrees;
-            QPoint numSteps = numDegrees / 15;
-            //qDebug() << numSteps;
-            scrollContentsBy(0, numSteps.y());
-            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - numSteps.y());
-        }
+//        if (!numPixels.isNull()) {
+//            scrollContentsBy(0, numPixels.y());
+//            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - numPixels.y());
+//        } else if (!numDegrees.isNull()) {
+//            //QPoint numSteps = numDegrees / 15;
 
-        event->accept();
-    }
-}
+//            int min = verticalScrollBar()->minimum();
+//            int max = verticalScrollBar()->maximum();
+//            double sdy = (numDegrees.y()*1.0)/contentsSize().height()*(max-min);
+
+//            scrollContentsBy(0, numDegrees.y());
+//            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - sdy);
+//        }
+
+//        event->accept();
+//    }
+//}
 
